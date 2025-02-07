@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bus Schedule</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 py-8">
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="px-6 py-4 bg-purple-600">
+          <h2 class="text-xl font-semibold text-white">Bus Schedule</h2>
+        </div>
+
+        <div class="p-6">
+          <div class="flex gap-4 mb-6">
+            <input
+              type="text"
+              id="from"
+              placeholder="From"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+            <input
+              type="text"
+              id="to"
+              placeholder="To"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+            <button
+              onclick="searchBuses()"
+              class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Search
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Bus No.
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    From
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    To
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Departure
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Arrival
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Fare
+                  </th>
+                  <th
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                class="bg-white divide-y divide-gray-200"
+                id="busScheduleTable"
+              >
+                <!-- Dynamic content will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Function to display the bus schedule dynamically in the table
+      function displayBuses(buses) {
+        const tableBody = document.getElementById("busScheduleTable")
+        tableBody.innerHTML = "" // Clear existing data
+
+        if (buses.length === 0) {
+          tableBody.innerHTML =
+            '<tr><td colspan="7" class="text-center px-6 py-4 text-gray-500">No buses found for the selected route.</td></tr>'
+        } else {
+          buses.forEach(bus => {
+            const row = document.createElement("tr")
+            row.classList.add("hover:bg-gray-50")
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${bus.busNo}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bus.from}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bus.to}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bus.departure}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bus.arrival}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${bus.fare}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button onclick="bookBus('${bus.busNo}')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Book
+                  </button>
+                </td>
+              `
+            tableBody.appendChild(row)
+          })
+        }
+      }
+
+      // Function to fetch buses from the API
+      async function fetchBuses(from = "", to = "") {
+        try {
+          const apiUrl = `/api/bus-trips/?source=${source}&destination=${destination}`
+
+          const buses = await response.json()
+          displayBuses(buses)
+        } catch (error) {
+          console.error("Error fetching bus data:", error)
+        }
+      }
+
+      // Function to filter buses based on 'From' and 'To' inputs
+      function searchBuses() {
+        const fromInput = document.getElementById("from").value.toLowerCase()
+        const toInput = document.getElementById("to").value.toLowerCase()
+
+        // Fetch filtered buses from the API
+        fetchBuses(fromInput, toInput)
+      }
+
+      // Function to handle booking a bus
+      function bookBus(busNo) {
+        alert(`Booking bus ${busNo}...`)
+        // You can add more logic here like showing a booking form, making a request, etc.
+      }
+
+      // Initial display of buses (without filters)
+      window.onload = () => {
+        fetchBuses()
+      }
+    </script>
+  </body>
+</html>
