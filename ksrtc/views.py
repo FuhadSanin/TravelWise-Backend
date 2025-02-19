@@ -2,16 +2,27 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from .models import BusTrip
 from .serializers import BusTripSerializer
-from django.shortcuts import render
+from django.contrib.auth.models import User
+from ksrtc.serializers import UserSerializer
+from rest_framework import permissions
 
-class BusTripViewSet(mixins.ListModelMixin,   # Handles GET /api/bus-trips/
-                     mixins.RetrieveModelMixin,  # Handles GET /api/bus-trips/{id}/
-                     mixins.CreateModelMixin,  # Handles POST /api/bus-trips/
-                     mixins.DestroyModelMixin,  # Handles DELETE /api/bus-trips/{id}/
-                     viewsets.GenericViewSet):  # Uses GenericViewSet
-                     
-    queryset = BusTrip.objects.all()
+class BusTripViewSet(mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.UpdateModelMixin,  
+                     viewsets.GenericViewSet): 
+     
     serializer_class = BusTripSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return BusTrip.objects.none()
+        if user.is_superuser:
+            return BusTrip.objects.all()  # Admins see all trips
+        return BusTrip.objects.filter(user=user)  # Normal users see only their trips
 
     def list(self, request, *args, **kwargs):
         source = request.query_params.get('source', None)
@@ -40,5 +51,7 @@ class BusTripViewSet(mixins.ListModelMixin,   # Handles GET /api/bus-trips/
         serializer = self.get_serializer(filtered_bus_trips, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-def bus_trips_template(request):
-    return render(request, 'add_bus_trip.html')
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()  
+    serializer_class = UserSerializer  
