@@ -19,7 +19,7 @@ class BusTripSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password']  # Include only these fields
+        fields = ['id', 'username', 'password', 'is_superuser']  # Include only these fields
 
     def create(self, validated_data):
         user = User(
